@@ -9,7 +9,9 @@ public class FloatingPanelScript : MonoBehaviour
     public static readonly float GENE_SPACING = .33f;
 
     public PlayerScript playerScript;
-    public TextMeshPro uraniumText;
+    new public AudioScript audio;
+    public PopupTextScript popupTextScript;
+    public TextMeshPro uraniumText, currentHeightText, maxHeightText;
     public GameObject genePrefab, mutationProjectilePrefab;
     public GameObject mutationBar;
     List<GameObject> geneObjects;
@@ -43,6 +45,10 @@ public class FloatingPanelScript : MonoBehaviour
             geneObjects[i].transform.localPosition = Vector3.Lerp(geneObjects[i].transform.localPosition, new Vector3(0, i * GENE_SPACING / 2, 0), .166f);
         }
 
+        // Update height texts.
+        currentHeightText.text = YToMeters(playerScript.gameObject.transform.localPosition.y) + "m";
+        maxHeightText.text = YToMeters(playerScript.maxY) + "m";
+
         if (Input.GetKeyDown(KeyCode.Space) || playerScript.mutationMeter >= 1) {
             SpawnMutationProjectile();
             playerScript.mutationMeter = 0;
@@ -59,6 +65,10 @@ public class FloatingPanelScript : MonoBehaviour
         TextMeshPro[] texts = geneObject.GetComponentsInChildren<TextMeshPro>();
         texts[0].text = Gene.NAME_LOOKUP[gene.id];
         texts[1].text = Gene.DESCRIPTION_LOOKUP[gene.id];
+    }
+    int YToMeters(float y) {
+        // multiplying by 5 corresponds to the player being 2 meters tall
+        return Mathf.RoundToInt(y * 4.375f) - 2;
     }
 
     void SpawnMutationProjectile() {
@@ -82,6 +92,7 @@ public class FloatingPanelScript : MonoBehaviour
 
         GameObject projectile = Instantiate(mutationProjectilePrefab, transform);
         projectile.GetComponent<MutationLineScript>().SetTarget(targetIndex);
+        audio.Mutate();
     }
     public void DestroyGene(int i) {
         GeneID id = playerScript.genes[i].id;
@@ -100,5 +111,6 @@ public class FloatingPanelScript : MonoBehaviour
             playerScript.genes.Insert(i, new Gene(GeneID.DamagedJunk));
             AddGene(i);
         }
+        popupTextScript.Display(Gene.NAME_LOOKUP[id] + " gene destroyed.");
     }
 }

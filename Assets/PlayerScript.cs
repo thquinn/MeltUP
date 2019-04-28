@@ -5,13 +5,14 @@ using UnityEngine;
 
 public class PlayerScript : MonoBehaviour
 {
-    static float[] MAX_SPEED = new float[] { 2.125f, 3, 3.5f, 4};
+    static float[] MAX_SPEED = new float[] { 2.125f, 3, 3.5f, 4, 4.33f, 4.66f, 5};
     static readonly float FRICTION = .5f;
     static readonly float TEFLON_FRICTION = .99f;
     static readonly float TEFLON_CONTROL = .5f;
     static readonly float JUMP_POWER = 2.75f;
     static readonly float AIR_JUMP_POWER = 2.2f;
     static readonly float JUMP_GRAVITY = .33f;
+    static readonly float SPRING_POWER = 7.5f;
     static float[] AIR_CONTROL = new float[] { .025f, .15f, .4f, .55f, .75f, 1};
     static int JUMP_REFRESH_FRAMES = 3, GROUND_LINGER_FRAMES = 6;
     static float GLIDE_SPEED = -.025f, GLIDE_POWER = .75f;
@@ -20,18 +21,22 @@ public class PlayerScript : MonoBehaviour
     int LAYER_URANIUM, LAYER_PUFF, LAYER_CHECKPOINT, LAYER_SHOP_GENE;
     int LAYER_MASK_ENVIRONMENT;
 
-    public GameObject spriteObject;
+    new public AudioScript audio;
+    public GameObject spriteObject, airJumpPrefab;
     Rigidbody2D rb2d;
 
     public List<Gene> genes;
     public int uranium;
     public float mutationMeter;
-    public int jumps, jumpRefreshFrames, groundLingerFrames, blinks;
+    public int jumps;
     public float deathY;
+    public TutorialScript tutorialScript;
+    int jumpRefreshFrames, groundLingerFrames, blinks;
     bool inCheckpoint = false;
     int inPuffs = 0;
     bool rightLastInput = true;
     public Vector3 lastSafePosition;
+    public float maxY;
 
     // Start is called before the first frame update
     void Start()
@@ -48,11 +53,7 @@ public class PlayerScript : MonoBehaviour
         genes.Add(new Gene(GeneID.JumpControl));
         genes.Add(new Gene(GeneID.AirControl));
         genes.Add(new Gene(GeneID.AirControl));
-        genes.Add(new Gene(GeneID.AirControl));
-        genes.Add(new Gene(GeneID.AirControl));
-        genes.Add(new Gene(GeneID.LeapOfFaith));
         genes.Add(new Gene(GeneID.Respawn));
-        genes.Shuffle();
 
         deathY = -5f;
         lastSafePosition = transform.localPosition;
@@ -62,6 +63,9 @@ public class PlayerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (transform.localPosition.y > maxY) {
+            maxY = transform.localPosition.y;
+        }
         if (transform.localPosition.y < deathY) {
             if (!HasGene(GeneID.Respawn)) {
                 Destroy(gameObject);
@@ -110,12 +114,19 @@ public class PlayerScript : MonoBehaviour
                 groundLingerFrames--;
             }
         }
+
         if (jumps > 0 && Input.GetButtonDown("Jump")) {
             newY = Mathf.Max(newY, (grounded || groundLingerFrames > 0) ? JUMP_POWER : AIR_JUMP_POWER);
             jumps--;
             jumpRefreshFrames = JUMP_REFRESH_FRAMES;
+            GameObject fx = Instantiate(airJumpPrefab, transform.parent);
+            fx.transform.localPosition = transform.localPosition + new Vector3(0, grounded ? -.2f : -.1f, 0);
+            audio.Jump();
         } else {
             jumpRefreshFrames--;
+        }
+        if (groundType == TileType.Spring) {
+            newY = Mathf.Max(newY, SPRING_POWER);
         }
 
         if (GetSpecialButton(GeneID.Glide) && newY < GLIDE_SPEED) {
@@ -130,9 +141,11 @@ public class PlayerScript : MonoBehaviour
         spriteObject.transform.localRotation = Quaternion.Lerp(spriteObject.transform.localRotation, Quaternion.Euler(0, rightLastInput ? 0 : 180, 0), .33f);
         rb2d.gravityScale = newY > 0 && (Input.GetButton("Jump") || !HasGene(GeneID.JumpControl)) ? JUMP_GRAVITY : 1;
 
-        if (transform.localPosition.y > 2 && !inCheckpoint) {
+        bool tutorial = transform.localPosition.y < 2 && !tutorialScript.Done();
+        if (!tutorial && !inCheckpoint) {
             mutationMeter += .00005f;
-            mutationMeter += uranium * .000025f;
+            float uraniumMult = .000025f * Mathf.Pow(.5f, NumGene(GeneID.UraniumBlock));
+            mutationMeter += uranium * uraniumMult;
             mutationMeter += genes.Count * .00002f;
             if (inPuffs > 0) {
                 mutationMeter += .005f;
@@ -140,7 +153,7 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    bool HasGene(GeneID id) {
+    public bool HasGene(GeneID id) {
         foreach (Gene gene in genes) {
             if (gene.id == id) {
                 return true;
@@ -148,7 +161,7 @@ public class PlayerScript : MonoBehaviour
         }
         return false;
     }
-    int NumGene(GeneID id) {
+    public int NumGene(GeneID id) {
         int ret = 0;
         foreach (Gene gene in genes) {
             if (gene.id == id) {
@@ -188,6 +201,9 @@ public class PlayerScript : MonoBehaviour
         if (hit.collider.gameObject.tag == "Teflon") {
             return TileType.Teflon;
         }
+        if (hit.collider.gameObject.tag == "Spring") {
+            return TileType.Spring;
+        }
         return TileType.Ground;
     }
     float AirControl() {
@@ -206,12 +222,14 @@ public class PlayerScript : MonoBehaviour
         if (collision.gameObject.layer == LAYER_URANIUM) {
             Destroy(collision.gameObject);
             uranium++;
+            audio.Uranium();
         }
         if (collision.gameObject.layer == LAYER_PUFF) {
             inPuffs++;
         }
         if (collision.gameObject.layer == LAYER_CHECKPOINT) {
             collision.gameObject.GetComponent<ShopSpawnerScript>().Enter(this);
+            mutationMeter = Mathf.Max(0, mutationMeter - .33f * NumGene(GeneID.Restoration));
             inCheckpoint = true;
         }
         if (collision.gameObject.layer == LAYER_SHOP_GENE) {

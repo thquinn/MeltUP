@@ -12,9 +12,11 @@ namespace Assets.Structs {
             { GeneID.Junk, new Color(.5f, .5f, .5f) },
             { GeneID.DamagedJunk, new Color(.55f, .55f, .55f) },
             { GeneID.Armor, new Color(.75f, .75f, .75f) },
+            { GeneID.UraniumBlock, new Color(0, .866f, .45f) },
             { GeneID.Respawn, new Color(1, 1, 1) },
             { GeneID.Glide, new Color(.825f, 1, .95f) },
             { GeneID.Blink, new Color(1, .75f, 1) },
+            { GeneID.Restoration, new Color(1, .66f, .66f) },
         };
         public static Dictionary<GeneID, string> NAME_LOOKUP = new Dictionary<GeneID, string>() {
             { GeneID.Speed, "Speed" },
@@ -25,22 +27,26 @@ namespace Assets.Structs {
             { GeneID.Junk, "Junk" },
             { GeneID.DamagedJunk, "Junk (Damaged)" },
             { GeneID.Armor, "Armor" },
+            { GeneID.UraniumBlock, "Alpha Absorption" },
             { GeneID.Respawn, "Respawn" },
             { GeneID.Glide, "Glide" },
             { GeneID.Blink, "Blink" },
+            { GeneID.Restoration, "Restoration" },
         };
         public static Dictionary<GeneID, string> DESCRIPTION_LOOKUP = new Dictionary<GeneID, string>() {
             { GeneID.Speed, "The more you have, the faster you move." },
             { GeneID.DoubleJump, "Gives you an extra jump." },
             { GeneID.LeapOfFaith, "50% chance to give you an extra jump." },
             { GeneID.JumpControl, "Allows you to control the height of your jump by holding the button." },
-            { GeneID.AirControl, "Improves your mid-air movement." },
+            { GeneID.AirControl, "Improves your midair movement." },
             { GeneID.Junk, "Junk DNA, resilient against radiation." },
             { GeneID.DamagedJunk, "Junk DNA, resilient against radiation. Still hangin' on..." },
             { GeneID.Armor, "Genetic armor, likely to take the hit from radiation." },
+            { GeneID.UraniumBlock, "Reduces irradiation from carried uranium." },
             { GeneID.Respawn, "Falling off the edge of the world doesn't end the game." },
             { GeneID.Glide, "Hold X to glide." },
             { GeneID.Blink, "Press X to blink." },
+            { GeneID.Restoration, "Reduces irradiation whenever you reach a checkpoint." },
         };
         public static Dictionary<GeneID, int[]> PRICE_LOOKUP = new Dictionary<GeneID, int[]>() {
             { GeneID.Speed, new int[]{ 7, 10 } },
@@ -50,9 +56,25 @@ namespace Assets.Structs {
             { GeneID.AirControl, new int[]{ 5, 8 } },
             { GeneID.Junk, new int[]{ 11, 15 } },
             { GeneID.Armor, new int[]{ 6, 9 } },
+            { GeneID.UraniumBlock, new int[]{ 8, 11 } },
             { GeneID.Respawn, new int[]{ 6, 9 } },
             { GeneID.Glide, new int[]{ 7, 10 } },
             { GeneID.Blink, new int[]{ 13, 17 } },
+            { GeneID.Restoration, new int[]{ 8, 11 } },
+        };
+        public static Dictionary<GeneID, float> SHOP_WEIGHT_LOOKUP = new Dictionary<GeneID, float>() {
+            { GeneID.Speed, 1f },
+            { GeneID.DoubleJump, .5f },
+            { GeneID.LeapOfFaith, .33f },
+            { GeneID.JumpControl, 1f },
+            { GeneID.AirControl, 1f },
+            { GeneID.Junk, .66f },
+            { GeneID.Armor, 1f },
+            { GeneID.UraniumBlock, .25f },
+            { GeneID.Respawn, .5f },
+            { GeneID.Glide, .2f },
+            { GeneID.Blink, .1f },
+            { GeneID.Restoration, .4f },
         };
 
         public GeneID id;
@@ -63,6 +85,6 @@ namespace Assets.Structs {
     }
 
     public enum GeneID {
-        Speed, DoubleJump, LeapOfFaith, JumpControl, AirControl, Junk, DamagedJunk, Armor, Respawn, Glide, Blink
+        Speed, DoubleJump, LeapOfFaith, JumpControl, AirControl, Junk, DamagedJunk, Armor, UraniumBlock, Respawn, Glide, Blink, Restoration
     }
 }

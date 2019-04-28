@@ -62,6 +62,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\AirJumpScript.cs" />
+    <Compile Include="Assets\AudioScript.cs" />
     <Compile Include="Assets\BackplateScript.cs" />
     <Compile Include="Assets\CameraScript.cs" />
     <Compile Include="Assets\ConveyorScript.cs" />
@@ -71,6 +73,7 @@
     <Compile Include="Assets\LevelGeneratorScript.cs" />
     <Compile Include="Assets\MutationLineScript.cs" />
     <Compile Include="Assets\PlayerScript.cs" />
+    <Compile Include="Assets\PopupTextScript.cs" />
     <Compile Include="Assets\PuffScript.cs" />
     <Compile Include="Assets\ShopGeneScript.cs" />
     <Compile Include="Assets\ShopSpawnerScript.cs" />
@@ -80,6 +83,7 @@
     <Compile Include="Assets\TooltipScript.cs" />
     <Compile Include="Assets\TutorialScript.cs" />
     <Compile Include="Assets\UraniumScript.cs" />
+    <Compile Include="Assets\VignetteScript.cs" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro_Properties.cginc" />

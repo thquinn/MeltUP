@@ -9,13 +9,14 @@ public class LevelGeneratorScript : MonoBehaviour
         { new Color32( 0x80, 0xD0, 0xFF, 0xFF ), TileType.Teflon },
         { new Color32( 0x00, 0x00, 0xFF, 0xFF ), TileType.Conveyor },
         { new Color32( 0x00, 0x00, 0x80, 0xFF ), TileType.ConveyorLeft },
+        { new Color32( 0xFF, 0x00, 0x00, 0xFF ), TileType.Spring },
         { Color.green, TileType.Grate },
         { new Color32( 0xFF, 0xD0, 0x00, 0xFF ), TileType.Uranium },
         { new Color32( 0x80, 0x80, 0x80, 0xFF ), TileType.Hidden },
     };
 
     public GameObject shopSpawnerPrefab;
-    public GameObject groundPrefab, teflonPrefab, conveyorPrefab, gratePrefab, uraniumPrefab, hiddenPrefab;
+    public GameObject groundPrefab, teflonPrefab, conveyorPrefab, springPrefab, gratePrefab, uraniumPrefab, hiddenPrefab;
     public GameObject[] backplatePrefabs, backbackplatePrefabs;
     public Dictionary<TileType, GameObject> TILE_TO_PREFAB;
 
@@ -35,6 +36,7 @@ public class LevelGeneratorScript : MonoBehaviour
             { TileType.Teflon, teflonPrefab },
             { TileType.Conveyor, conveyorPrefab },
             { TileType.ConveyorLeft, conveyorPrefab },
+            { TileType.Spring, springPrefab },
             { TileType.Grate, gratePrefab },
             { TileType.Uranium, uraniumPrefab },
             { TileType.Hidden, hiddenPrefab },
@@ -66,16 +68,7 @@ public class LevelGeneratorScript : MonoBehaviour
         }
         activeChunks = new List<GameObject>();
         SpawnNewChunk(0);
-        SpawnNewChunk(1);
-        SpawnNewChunk(6);
-        SpawnNewChunk(1);
-        SpawnNewChunk(5);
-        SpawnNewChunk(1);
-        SpawnNewChunk(2);
-        SpawnNewChunk(1);
-        SpawnNewChunk(3);
-        SpawnNewChunk(1);
-        SpawnNewChunk(4);
+        SpawnNewChunk(8);
         SpawnNewChunk(1);
 
         backplateses = new List<GameObject>[2];
@@ -182,5 +175,5 @@ public class LevelGeneratorScript : MonoBehaviour
 }
 
 public enum TileType {
-    None, Ground, Teflon, Conveyor, ConveyorLeft, Grate, Uranium, Hidden
+    None, Ground, Teflon, Conveyor, ConveyorLeft, Spring, Grate, Uranium, Hidden
 }

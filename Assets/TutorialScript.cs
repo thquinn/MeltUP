@@ -29,6 +29,11 @@ public class TutorialScript : MonoBehaviour {
     // Update is called once per frame
     void FixedUpdate()
     {
+        if (Camera.main.transform.localPosition.y > 1.5f) {
+            Destroy(gameObject);
+            return;
+        }
+
         Vector3 pos = transform.localPosition;
         pos.x = Camera.main.transform.localPosition.x;
         transform.localPosition = pos;
@@ -40,5 +45,9 @@ public class TutorialScript : MonoBehaviour {
         Color color = text.color;
         color.a = Mathf.Clamp01(text.color.a + (Input.GetKey(KeyCode.LeftShift) ? -.1f : .1f));
         text.color = color;
+    }
+
+    public bool Done() {
+        return i == TUTORIAL_TEXT.Length - 1;
     }
 }

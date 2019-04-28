@@ -18,7 +18,7 @@ public class ShopGeneScript : MonoBehaviour
     public void SetID(GeneID id) {
         this.id = id;
         nameText.text = Gene.NAME_LOOKUP[id];
-        foreach (SpriteRenderer spriteRenderer in GetComponentsInChildren<SpriteRenderer>()) {
+        foreach (SpriteRenderer spriteRenderer in spriteObject.GetComponentsInChildren<SpriteRenderer>()) {
             spriteRenderer.color = Gene.COLOR_LOOKUP[id];
         }
         int[] prices = Gene.PRICE_LOOKUP[id];
