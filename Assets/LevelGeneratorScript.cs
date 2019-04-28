@@ -11,15 +11,17 @@ public class LevelGeneratorScript : MonoBehaviour
         { new Color32( 0x00, 0x00, 0x80, 0xFF ), TileType.ConveyorLeft },
         { Color.green, TileType.Grate },
         { new Color32( 0xFF, 0xD0, 0x00, 0xFF ), TileType.Uranium },
+        { new Color32( 0x80, 0x80, 0x80, 0xFF ), TileType.Hidden },
     };
 
     public GameObject shopSpawnerPrefab;
-    public GameObject groundPrefab, teflonPrefab, conveyorPrefab, gratePrefab, uraniumPrefab;
+    public GameObject groundPrefab, teflonPrefab, conveyorPrefab, gratePrefab, uraniumPrefab, hiddenPrefab;
+    public GameObject[] backplatePrefabs;
     public Dictionary<TileType, GameObject> TILE_TO_PREFAB;
 
     public Texture2D chunksTexture;
     List<TileType[,]> chunks;
-    List<GameObject> activeChunks;
+    List<GameObject> activeChunks, backplates;
     float nextY;
     bool flip;
 
@@ -34,6 +36,7 @@ public class LevelGeneratorScript : MonoBehaviour
             { TileType.ConveyorLeft, conveyorPrefab },
             { TileType.Grate, gratePrefab },
             { TileType.Uranium, uraniumPrefab },
+            { TileType.Hidden, hiddenPrefab },
         };
         // Load chunks.
         chunks = new List<TileType[,]>();
@@ -63,9 +66,18 @@ public class LevelGeneratorScript : MonoBehaviour
         activeChunks = new List<GameObject>();
         SpawnNewChunk(0);
         SpawnNewChunk(1);
+        SpawnNewChunk(6);
+        SpawnNewChunk(1);
+        SpawnNewChunk(5);
+        SpawnNewChunk(1);
         SpawnNewChunk(2);
+        SpawnNewChunk(1);
         SpawnNewChunk(3);
+        SpawnNewChunk(1);
         SpawnNewChunk(4);
+        SpawnNewChunk(1);
+
+        backplates = new List<GameObject>();
     }
     Color GetPixel(int x, int y) {
         return chunksTexture.GetPixel(x, chunksTexture.height - y - 1);
@@ -81,14 +93,40 @@ public class LevelGeneratorScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        // Backplates.
+        if (backplates.Count > 0) {
+            Vector3 screenPos = backplates[0].transform.localPosition - Camera.main.transform.localPosition;
+            if (screenPos.y < -100) {
+                Destroy(backplates[0]);
+                backplates.RemoveAt(0);
+            }
+        }
+        bool newBackplate = backplates.Count == 0;
+        if (!newBackplate) {
+
+            Vector3 screenPos = backplates[backplates.Count - 1].transform.localPosition - Camera.main.transform.localPosition;
+            newBackplate = screenPos.y < -2;
+        }
+        if (newBackplate) {
+            GameObject backplateObject = Instantiate(backplatePrefabs[Random.Range(0, backplatePrefabs.Length)]);
+            backplateObject.transform.parent = transform.parent;
+            float y = backplates.Count == 0 ? 0 : backplates[backplates.Count - 1].GetComponent<BackplateScript>().originalPos.y - 18.25f;
+            backplateObject.transform.localPosition = new Vector3(0, y, 10);
+            SpriteRenderer backplateRenderer = backplateObject.GetComponent<SpriteRenderer>();
+            backplateRenderer.flipX = Random.value < .5f;
+            backplateRenderer.flipY = Random.value < .5f;
+            backplateObject.transform.localScale = new Vector3(5, 5);
+            backplateObject.AddComponent<BackplateScript>().multiplier = .5f;
+            backplates.Add(backplateObject);
+        }
     }
     void SpawnNewChunk() {
         SpawnNewChunk(Random.Range(2, chunks.Count));
     }
     void SpawnNewChunk(int index) {
         TileType[,] chunk = chunks[index];
-        GameObject chunkObject = new GameObject();
+        GameObject chunkObject = new GameObject("Chunk");
+        activeChunks.Add(chunkObject);
         nextY += chunk.GetLength(1) * .2f;
         chunkObject.transform.Translate(0, nextY, 0);
         if (index == 1) {
@@ -114,8 +152,16 @@ public class LevelGeneratorScript : MonoBehaviour
         }
         flip = !flip;
     }
+
+    public void CleanupChunks(GameObject upTo) {
+        int i = activeChunks.IndexOf(upTo);
+        for (int j = 0; j < i; j++) {
+            Destroy(activeChunks[j]);
+        }
+        activeChunks.RemoveRange(0, i);
+    }
 }
 
 public enum TileType {
-    None, Ground, Teflon, Conveyor, ConveyorLeft, Grate, Uranium
+    None, Ground, Teflon, Conveyor, ConveyorLeft, Grate, Uranium, Hidden
 }

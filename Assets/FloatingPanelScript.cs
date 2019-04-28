@@ -6,24 +6,6 @@ using UnityEngine;
 
 public class FloatingPanelScript : MonoBehaviour
 {
-    static Dictionary<GeneID, Color> GENE_COLOR_LOOKUP = new Dictionary<GeneID, Color>() {
-        { GeneID.Speed, new Color(1, .8f, .8f) },
-        { GeneID.Jump, new Color(.85f, .95f, 1) },
-        { GeneID.JumpControl, new Color(.95f, 1, .9f) },
-        { GeneID.AirControl, new Color(.95f, .85f, 1) },
-    };
-    static Dictionary<GeneID, string> GENE_NAME_LOOKUP = new Dictionary<GeneID, string>() {
-        { GeneID.Speed, "Speed" },
-        { GeneID.Jump, "Jump" },
-        { GeneID.JumpControl, "Jump Control" },
-        { GeneID.AirControl, "Air Control" },
-    };
-    static Dictionary<GeneID, string> GENE_DESCRIPTION_LOOKUP = new Dictionary<GeneID, string>() {
-        { GeneID.Speed, "The more you have, the faster you move." },
-        { GeneID.Jump, "Determines how many jumps you have." },
-        { GeneID.JumpControl, "Allows you to control the height of your jump by holding the button." },
-        { GeneID.AirControl, "Allows you to control your movement in the air." },
-    };
     public static readonly float GENE_SPACING = .33f;
 
     public PlayerScript playerScript;
@@ -39,18 +21,6 @@ public class FloatingPanelScript : MonoBehaviour
         geneObjects = new List<GameObject>();
         offset = transform.position;
         barX = mutationBar.transform.localPosition.x;
-        for (int i = 0; i < playerScript.genes.Count; i++) {
-            Gene gene = playerScript.genes[i];
-            GameObject geneObject = Instantiate(genePrefab, transform);
-            geneObjects.Add(geneObject);
-            geneObject.transform.Translate(0, i * GENE_SPACING, 0);
-            foreach (SpriteRenderer geneRenderer in geneObject.GetComponentsInChildren<SpriteRenderer>()) {
-                geneRenderer.color = GENE_COLOR_LOOKUP[gene.id];
-            }
-            TextMeshPro[] texts = geneObject.GetComponentsInChildren<TextMeshPro>();
-            texts[0].text = GENE_NAME_LOOKUP[gene.id];
-            texts[1].text = GENE_DESCRIPTION_LOOKUP[gene.id];
-        }
     }
 
     // Update is called once per frame
@@ -63,6 +33,11 @@ public class FloatingPanelScript : MonoBehaviour
         mutationBar.transform.localPosition = new Vector3(x, mutationBar.transform.localPosition.y);
         mutationBar.transform.localScale = new Vector3(width, mutationBar.transform.localScale.y, 1);
 
+        // Add missing gene icons.
+        for (int i = geneObjects.Count; i < playerScript.genes.Count; i++) {
+            AddGene(i);
+        }
+
         // Update gene icon positions.
         for (int i = 0; i < geneObjects.Count; i++) {
             geneObjects[i].transform.localPosition = Vector3.Lerp(geneObjects[i].transform.localPosition, new Vector3(0, i * GENE_SPACING / 2, 0), .166f);
@@ -73,12 +48,43 @@ public class FloatingPanelScript : MonoBehaviour
             playerScript.mutationMeter = 0;
         }
     }
+    void AddGene(int i) {
+        Gene gene = playerScript.genes[i];
+        GameObject geneObject = Instantiate(genePrefab, transform);
+        geneObjects.Insert(i, geneObject);
+        geneObject.transform.Translate(0, i * GENE_SPACING, 0);
+        foreach (SpriteRenderer geneRenderer in geneObject.GetComponentsInChildren<SpriteRenderer>()) {
+            geneRenderer.color = Gene.COLOR_LOOKUP[gene.id];
+        }
+        TextMeshPro[] texts = geneObject.GetComponentsInChildren<TextMeshPro>();
+        texts[0].text = Gene.NAME_LOOKUP[gene.id];
+        texts[1].text = Gene.DESCRIPTION_LOOKUP[gene.id];
+    }
 
     void SpawnMutationProjectile() {
+        // Select the gene to lose.
+        float[] chances = new float[playerScript.genes.Count];
+        for (int i = 0; i < chances.Length; i++) {
+            chances[i] = playerScript.genes[i].id == GeneID.Armor ? playerScript.genes.Count : 1;
+        }
+        float totalChance = 0;
+        foreach (float f in chances) {
+            totalChance += f;
+        }
+        float selector = Random.value * totalChance;
+        int targetIndex = 0;
+        for (; targetIndex < chances.Length; targetIndex++) {
+            selector -= chances[targetIndex];
+            if (selector < 0) {
+                break;
+            }
+        }
+
         GameObject projectile = Instantiate(mutationProjectilePrefab, transform);
-        projectile.GetComponent<MutationLineScript>().SetTarget(Random.Range(0, playerScript.genes.Count));
+        projectile.GetComponent<MutationLineScript>().SetTarget(targetIndex);
     }
     public void DestroyGene(int i) {
+        GeneID id = playerScript.genes[i].id;
         foreach (Transform child in geneObjects[i].transform) {
             GeneDeathScript geneDeathScript = child.gameObject.GetComponent<GeneDeathScript>();
             if (geneDeathScript != null) {
@@ -87,5 +93,9 @@ public class FloatingPanelScript : MonoBehaviour
         }
         playerScript.genes.RemoveAt(i);
         geneObjects.RemoveAt(i);
+        if (id == GeneID.Junk) {
+            playerScript.genes.Insert(i, new Gene(GeneID.DamagedJunk));
+            AddGene(i);
+        }
     }
 }

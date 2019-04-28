@@ -5,7 +5,7 @@ using UnityEngine;
 public class ConveyorScript : MonoBehaviour
 {
     GameObject gearbox;
-    float[] rotations = new float[] { -2.5f, 4, -8 };
+    float[] rotations = new float[] { -5, 4, -8 };
 
     // Start is called before the first frame update
     void Start()

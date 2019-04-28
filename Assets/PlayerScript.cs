@@ -5,25 +5,28 @@ using UnityEngine;
 
 public class PlayerScript : MonoBehaviour
 {
-    static float[] MAX_SPEED = new float[] { 1.25f, 2.125f, 3, 3.5f, 4};
+    static float[] MAX_SPEED = new float[] { 2.125f, 3, 3.5f, 4};
     static readonly float FRICTION = .5f;
     static readonly float TEFLON_FRICTION = .99f;
     static readonly float TEFLON_CONTROL = .5f;
     static readonly float JUMP_POWER = 2.75f;
+    static readonly float AIR_JUMP_POWER = 2.2f;
     static readonly float JUMP_GRAVITY = .33f;
-    static float[] AIR_CONTROL = new float[] { 0, .15f, .55f, .75f, 1};
+    static float[] AIR_CONTROL = new float[] { .025f, .15f, .4f, .55f, .75f, 1};
     static int JUMP_REFRESH_FRAMES = 3, GROUND_LINGER_FRAMES = 6;
 
-    int LAYER_URANIUM, LAYER_PUFF;
+    int LAYER_URANIUM, LAYER_PUFF, LAYER_CHECKPOINT, LAYER_SHOP_GENE;
     int LAYER_MASK_ENVIRONMENT;
 
     public GameObject spriteObject;
     Rigidbody2D rb2d;
 
     public List<Gene> genes;
-    public int uranium = 0;
-    public float mutationMeter = 1;
-    int jumps = 0, jumpRefreshFrames = 0, groundLingerFrames = 0;
+    public int uranium;
+    public float mutationMeter;
+    public int jumps, jumpRefreshFrames, groundLingerFrames;
+    public float deathY;
+    bool inCheckpoint = false;
     int inPuffs = 0;
     bool rightLastInput = true;
 
@@ -32,22 +35,34 @@ public class PlayerScript : MonoBehaviour
     {
         LAYER_URANIUM = LayerMask.NameToLayer("Uranium");
         LAYER_PUFF = LayerMask.NameToLayer("Puff");
+        LAYER_CHECKPOINT = LayerMask.NameToLayer("Checkpoint");
+        LAYER_SHOP_GENE = LayerMask.NameToLayer("ShopGene");
         LAYER_MASK_ENVIRONMENT = 1 << LayerMask.NameToLayer("Environment");
         rb2d = GetComponent<Rigidbody2D>();
 
         genes = new List<Gene>();
         genes.Add(new Gene(GeneID.Speed));
-        genes.Add(new Gene(GeneID.Speed));
-        genes.Add(new Gene(GeneID.Jump));
         genes.Add(new Gene(GeneID.JumpControl));
         genes.Add(new Gene(GeneID.AirControl));
         genes.Add(new Gene(GeneID.AirControl));
+        genes.Add(new Gene(GeneID.LeapOfFaith));
+        genes.Add(new Gene(GeneID.Junk));
+        genes.Add(new Gene(GeneID.Armor));
+        genes.Add(new Gene(GeneID.Respawn));
         genes.Shuffle();
+
+        deathY = -5f;
+        uranium = 20;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (transform.localPosition.y < deathY) {
+            Destroy(gameObject);
+            return;
+        }
+
         bool grounded = CheckGrounded();
         TileType groundType = GroundType();
 
@@ -73,20 +88,18 @@ public class PlayerScript : MonoBehaviour
         }
 
         float newY = rb2d.velocity.y;
-        int maxJumps = MaxJumps();
-        jumps = Mathf.Min(jumps, maxJumps);
         if (grounded && jumpRefreshFrames <= 0) {
-            jumps = maxJumps;
+            jumps = MaxJumps();
             groundLingerFrames = GROUND_LINGER_FRAMES;
         } else if (!grounded) { 
             if (groundLingerFrames == 0) {
-                jumps = Mathf.Min(maxJumps - 1, jumps, 0);
+                jumps = Mathf.Min(MaxPotentialJumps() - 1, jumps);
             } else {
                 groundLingerFrames--;
             }
         }
         if (jumps > 0 && Input.GetButtonDown("Jump")) {
-            newY = JUMP_POWER;
+            newY = Mathf.Max(newY, (grounded || groundLingerFrames > 0) ? JUMP_POWER : AIR_JUMP_POWER);
             jumps--;
             jumpRefreshFrames = JUMP_REFRESH_FRAMES;
         } else {
@@ -96,11 +109,13 @@ public class PlayerScript : MonoBehaviour
         spriteObject.transform.localRotation = Quaternion.Lerp(spriteObject.transform.localRotation, Quaternion.Euler(0, rightLastInput ? 0 : 180, 0), .33f);
         rb2d.gravityScale = newY > 0 && (Input.GetButton("Jump") || !HasGene(GeneID.JumpControl)) ? JUMP_GRAVITY : 1;
 
-        mutationMeter += .00005f;
-        mutationMeter += uranium * .00005f;
-        mutationMeter += genes.Count * .00002f;
-        if (inPuffs > 0) {
-            mutationMeter += .005f;
+        if (!inCheckpoint) {
+            mutationMeter += .00005f;
+            mutationMeter += uranium * .000025f;
+            mutationMeter += genes.Count * .00002f;
+            if (inPuffs > 0) {
+                mutationMeter += .005f;
+            }
         }
     }
 
@@ -127,10 +142,13 @@ public class PlayerScript : MonoBehaviour
         return MAX_SPEED[speeds];
     }
     int MaxJumps() {
-        return Mathf.Min(NumGene(GeneID.Jump), 2);
+        return 1 + NumGene(GeneID.DoubleJump) + Random.Range(0, NumGene(GeneID.LeapOfFaith) + 1);
+    }
+    int MaxPotentialJumps() {
+        return 1 + NumGene(GeneID.DoubleJump) + NumGene(GeneID.LeapOfFaith);
     }
     bool CheckGrounded() {
-        for (float dx = -.075f; dx <= .075f; dx += .075f) {
+        for (float dx = -.075f; dx <= .075f; dx += .025f) {
             Vector2 rayStart = new Vector3(transform.position.x + dx, transform.position.y);
             Debug.DrawLine(transform.position + new Vector3(dx, 0, 0), transform.position - new Vector3(-dx, .23f, 0));
             RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, .23f, LAYER_MASK_ENVIRONMENT);
@@ -164,10 +182,21 @@ public class PlayerScript : MonoBehaviour
         if (collision.gameObject.layer == LAYER_PUFF) {
             inPuffs++;
         }
+        if (collision.gameObject.layer == LAYER_CHECKPOINT) {
+            collision.gameObject.GetComponent<ShopSpawnerScript>().Enter(this);
+            inCheckpoint = true;
+        }
+        if (collision.gameObject.layer == LAYER_SHOP_GENE) {
+            collision.gameObject.GetComponent<ShopGeneScript>().Buy(this);
+        }
     }
     private void OnTriggerExit2D(Collider2D collision) {
         if (collision.gameObject.layer == LAYER_PUFF) {
             inPuffs--;
+        }
+        if (collision.gameObject.layer == LAYER_CHECKPOINT) {
+            collision.gameObject.GetComponent<ShopSpawnerScript>().Leave();
+            inCheckpoint = false;
         }
     }
 }

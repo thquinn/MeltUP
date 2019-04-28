@@ -7,10 +7,12 @@ public class CameraScript : MonoBehaviour
     readonly float TRACKING = .2f;
 
     public GameObject player;
+    PlayerScript playerScript;
 
     // Start is called before the first frame update
     void Start()
     {
+        playerScript = player.GetComponent<PlayerScript>();
         Application.targetFrameRate = 60;
     }
 
@@ -19,6 +21,7 @@ public class CameraScript : MonoBehaviour
     {
         float x = transform.position.x * (1 - TRACKING) + player.transform.position.x * TRACKING;
         float y = transform.position.y * (1 - TRACKING) + player.transform.position.y * TRACKING;
+        y = Mathf.Max(y, playerScript.deathY + 3);
         transform.position = new Vector3(x, y, transform.position.z);
     }
 }
