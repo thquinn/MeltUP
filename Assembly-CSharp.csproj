@@ -78,6 +78,7 @@
     <Compile Include="Assets\Structs\Gene.cs" />
     <Compile Include="Assets\Structs\ListExtensions.cs" />
     <Compile Include="Assets\TooltipScript.cs" />
+    <Compile Include="Assets\TutorialScript.cs" />
     <Compile Include="Assets\UraniumScript.cs" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />

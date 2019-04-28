@@ -16,12 +16,13 @@ public class LevelGeneratorScript : MonoBehaviour
 
     public GameObject shopSpawnerPrefab;
     public GameObject groundPrefab, teflonPrefab, conveyorPrefab, gratePrefab, uraniumPrefab, hiddenPrefab;
-    public GameObject[] backplatePrefabs;
+    public GameObject[] backplatePrefabs, backbackplatePrefabs;
     public Dictionary<TileType, GameObject> TILE_TO_PREFAB;
 
     public Texture2D chunksTexture;
     List<TileType[,]> chunks;
-    List<GameObject> activeChunks, backplates;
+    List<GameObject> activeChunks;
+    List<GameObject>[] backplateses;
     float nextY;
     bool flip;
 
@@ -77,7 +78,9 @@ public class LevelGeneratorScript : MonoBehaviour
         SpawnNewChunk(4);
         SpawnNewChunk(1);
 
-        backplates = new List<GameObject>();
+        backplateses = new List<GameObject>[2];
+        backplateses[0] = new List<GameObject>();
+        backplateses[1] = new List<GameObject>();
     }
     Color GetPixel(int x, int y) {
         return chunksTexture.GetPixel(x, chunksTexture.height - y - 1);
@@ -94,30 +97,46 @@ public class LevelGeneratorScript : MonoBehaviour
     void Update()
     {
         // Backplates.
-        if (backplates.Count > 0) {
-            Vector3 screenPos = backplates[0].transform.localPosition - Camera.main.transform.localPosition;
-            if (screenPos.y < -100) {
-                Destroy(backplates[0]);
-                backplates.RemoveAt(0);
+        for (int i = 0; i < backplateses.Length; i++) {
+            List<GameObject> backplates = backplateses[i];
+            if (backplates.Count > 0) {
+                Vector3 screenPos = backplates[0].transform.localPosition - Camera.main.transform.localPosition;
+                if (screenPos.y < -100) {
+                    Destroy(backplates[0]);
+                    backplates.RemoveAt(0);
+                }
             }
-        }
-        bool newBackplate = backplates.Count == 0;
-        if (!newBackplate) {
+            bool newBackplate = backplates.Count == 0;
+            if (!newBackplate) {
 
-            Vector3 screenPos = backplates[backplates.Count - 1].transform.localPosition - Camera.main.transform.localPosition;
-            newBackplate = screenPos.y < -2;
-        }
-        if (newBackplate) {
-            GameObject backplateObject = Instantiate(backplatePrefabs[Random.Range(0, backplatePrefabs.Length)]);
-            backplateObject.transform.parent = transform.parent;
-            float y = backplates.Count == 0 ? 0 : backplates[backplates.Count - 1].GetComponent<BackplateScript>().originalPos.y - 18.25f;
-            backplateObject.transform.localPosition = new Vector3(0, y, 10);
-            SpriteRenderer backplateRenderer = backplateObject.GetComponent<SpriteRenderer>();
-            backplateRenderer.flipX = Random.value < .5f;
-            backplateRenderer.flipY = Random.value < .5f;
-            backplateObject.transform.localScale = new Vector3(5, 5);
-            backplateObject.AddComponent<BackplateScript>().multiplier = .5f;
-            backplates.Add(backplateObject);
+                Vector3 screenPos = backplates[backplates.Count - 1].transform.localPosition - Camera.main.transform.localPosition;
+                newBackplate = screenPos.y < -2;
+            }
+            if (newBackplate) {
+                GameObject[] prefabs = i == 0 ? backplatePrefabs : backbackplatePrefabs;
+                int prefabIndex;
+                if (i == 1) {
+                    prefabIndex = Mathf.Min(backplates.Count, 1);
+                } else if (backplates.Count == 0) {
+                    do {
+                        prefabIndex = Random.Range(0, prefabs.Length);
+                    } while (prefabIndex == 2);
+                } else {
+                    prefabIndex = Random.Range(0, prefabs.Length);
+                }
+                GameObject backplateObject = Instantiate(prefabs[prefabIndex]);
+                backplateObject.transform.parent = transform.parent;
+                float y = backplates.Count == 0 ? (i == 0 ? 0 : -2.66f) : backplates[backplates.Count - 1].GetComponent<BackplateScript>().originalPos.y - 18.25f;
+                backplateObject.transform.localPosition = new Vector3(0, y, 10 * (i + 1));
+                SpriteRenderer backplateRenderer = backplateObject.GetComponent<SpriteRenderer>();
+                if (i == 0) {
+                    backplateRenderer.flipX = Random.value < .5f;
+                    backplateRenderer.flipY = Random.value < .5f;
+                }
+                backplateObject.transform.localScale = new Vector3(5, 5);
+                backplateObject.AddComponent<BackplateScript>().multiplier = i == 0 ? .5f : .975f;
+                backplates.Add(backplateObject);
+            }
         }
     }
     void SpawnNewChunk() {

@@ -13,6 +13,8 @@ namespace Assets.Structs {
             { GeneID.DamagedJunk, new Color(.55f, .55f, .55f) },
             { GeneID.Armor, new Color(.75f, .75f, .75f) },
             { GeneID.Respawn, new Color(1, 1, 1) },
+            { GeneID.Glide, new Color(.825f, 1, .95f) },
+            { GeneID.Blink, new Color(1, .75f, 1) },
         };
         public static Dictionary<GeneID, string> NAME_LOOKUP = new Dictionary<GeneID, string>() {
             { GeneID.Speed, "Speed" },
@@ -24,6 +26,8 @@ namespace Assets.Structs {
             { GeneID.DamagedJunk, "Junk (Damaged)" },
             { GeneID.Armor, "Armor" },
             { GeneID.Respawn, "Respawn" },
+            { GeneID.Glide, "Glide" },
+            { GeneID.Blink, "Blink" },
         };
         public static Dictionary<GeneID, string> DESCRIPTION_LOOKUP = new Dictionary<GeneID, string>() {
             { GeneID.Speed, "The more you have, the faster you move." },
@@ -35,6 +39,8 @@ namespace Assets.Structs {
             { GeneID.DamagedJunk, "Junk DNA, resilient against radiation. Still hangin' on..." },
             { GeneID.Armor, "Genetic armor, likely to take the hit from radiation." },
             { GeneID.Respawn, "Falling off the edge of the world doesn't end the game." },
+            { GeneID.Glide, "Hold X to glide." },
+            { GeneID.Blink, "Press X to blink." },
         };
         public static Dictionary<GeneID, int[]> PRICE_LOOKUP = new Dictionary<GeneID, int[]>() {
             { GeneID.Speed, new int[]{ 7, 10 } },
@@ -45,6 +51,8 @@ namespace Assets.Structs {
             { GeneID.Junk, new int[]{ 11, 15 } },
             { GeneID.Armor, new int[]{ 6, 9 } },
             { GeneID.Respawn, new int[]{ 6, 9 } },
+            { GeneID.Glide, new int[]{ 7, 10 } },
+            { GeneID.Blink, new int[]{ 13, 17 } },
         };
 
         public GeneID id;
@@ -55,6 +63,6 @@ namespace Assets.Structs {
     }
 
     public enum GeneID {
-        Speed, DoubleJump, LeapOfFaith, JumpControl, AirControl, Junk, DamagedJunk, Armor, Respawn
+        Speed, DoubleJump, LeapOfFaith, JumpControl, AirControl, Junk, DamagedJunk, Armor, Respawn, Glide, Blink
     }
 }

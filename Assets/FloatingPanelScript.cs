@@ -91,6 +91,9 @@ public class FloatingPanelScript : MonoBehaviour
                 geneDeathScript.enabled = true;
             }
         }
+        foreach (TextMeshPro textMeshPro in geneObjects[i].GetComponentsInChildren<TextMeshPro>()) {
+            Destroy(textMeshPro);
+        }
         playerScript.genes.RemoveAt(i);
         geneObjects.RemoveAt(i);
         if (id == GeneID.Junk) {

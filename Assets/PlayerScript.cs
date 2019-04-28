@@ -14,6 +14,8 @@ public class PlayerScript : MonoBehaviour
     static readonly float JUMP_GRAVITY = .33f;
     static float[] AIR_CONTROL = new float[] { .025f, .15f, .4f, .55f, .75f, 1};
     static int JUMP_REFRESH_FRAMES = 3, GROUND_LINGER_FRAMES = 6;
+    static float GLIDE_SPEED = -.025f, GLIDE_POWER = .75f;
+    static float BLINK_DISTANCE = 1;
 
     int LAYER_URANIUM, LAYER_PUFF, LAYER_CHECKPOINT, LAYER_SHOP_GENE;
     int LAYER_MASK_ENVIRONMENT;
@@ -24,11 +26,12 @@ public class PlayerScript : MonoBehaviour
     public List<Gene> genes;
     public int uranium;
     public float mutationMeter;
-    public int jumps, jumpRefreshFrames, groundLingerFrames;
+    public int jumps, jumpRefreshFrames, groundLingerFrames, blinks;
     public float deathY;
     bool inCheckpoint = false;
     int inPuffs = 0;
     bool rightLastInput = true;
+    public Vector3 lastSafePosition;
 
     // Start is called before the first frame update
     void Start()
@@ -45,13 +48,14 @@ public class PlayerScript : MonoBehaviour
         genes.Add(new Gene(GeneID.JumpControl));
         genes.Add(new Gene(GeneID.AirControl));
         genes.Add(new Gene(GeneID.AirControl));
+        genes.Add(new Gene(GeneID.AirControl));
+        genes.Add(new Gene(GeneID.AirControl));
         genes.Add(new Gene(GeneID.LeapOfFaith));
-        genes.Add(new Gene(GeneID.Junk));
-        genes.Add(new Gene(GeneID.Armor));
         genes.Add(new Gene(GeneID.Respawn));
         genes.Shuffle();
 
         deathY = -5f;
+        lastSafePosition = transform.localPosition;
         uranium = 20;
     }
 
@@ -59,12 +63,19 @@ public class PlayerScript : MonoBehaviour
     void Update()
     {
         if (transform.localPosition.y < deathY) {
-            Destroy(gameObject);
-            return;
+            if (!HasGene(GeneID.Respawn)) {
+                Destroy(gameObject);
+                return;
+            }
+            transform.localPosition = lastSafePosition;
         }
 
-        bool grounded = CheckGrounded();
+        int groundedness = CheckGrounded();
+        bool grounded = groundedness > 0;
         TileType groundType = GroundType();
+        if (groundedness == 7) {
+            lastSafePosition = transform.localPosition;
+        }
 
         float axis = Input.GetAxis("Horizontal");
         if (axis != 0) {
@@ -91,6 +102,7 @@ public class PlayerScript : MonoBehaviour
         if (grounded && jumpRefreshFrames <= 0) {
             jumps = MaxJumps();
             groundLingerFrames = GROUND_LINGER_FRAMES;
+            blinks = 1;
         } else if (!grounded) { 
             if (groundLingerFrames == 0) {
                 jumps = Mathf.Min(MaxPotentialJumps() - 1, jumps);
@@ -105,11 +117,20 @@ public class PlayerScript : MonoBehaviour
         } else {
             jumpRefreshFrames--;
         }
+
+        if (GetSpecialButton(GeneID.Glide) && newY < GLIDE_SPEED) {
+            newY = Mathf.Lerp(newY, GLIDE_SPEED, GLIDE_POWER);
+        }
+        if (GetSpecialButtonDown(GeneID.Blink) && blinks > 0) {
+            transform.Translate(BLINK_DISTANCE * (rightLastInput ? 1 : -1), 0, 0);
+            blinks--;
+        }
+
         rb2d.velocity = new Vector2(newX, newY);
         spriteObject.transform.localRotation = Quaternion.Lerp(spriteObject.transform.localRotation, Quaternion.Euler(0, rightLastInput ? 0 : 180, 0), .33f);
         rb2d.gravityScale = newY > 0 && (Input.GetButton("Jump") || !HasGene(GeneID.JumpControl)) ? JUMP_GRAVITY : 1;
 
-        if (!inCheckpoint) {
+        if (transform.localPosition.y > 2 && !inCheckpoint) {
             mutationMeter += .00005f;
             mutationMeter += uranium * .000025f;
             mutationMeter += genes.Count * .00002f;
@@ -147,16 +168,17 @@ public class PlayerScript : MonoBehaviour
     int MaxPotentialJumps() {
         return 1 + NumGene(GeneID.DoubleJump) + NumGene(GeneID.LeapOfFaith);
     }
-    bool CheckGrounded() {
+    int CheckGrounded() {
+        int ret = 0;
         for (float dx = -.075f; dx <= .075f; dx += .025f) {
             Vector2 rayStart = new Vector3(transform.position.x + dx, transform.position.y);
             Debug.DrawLine(transform.position + new Vector3(dx, 0, 0), transform.position - new Vector3(-dx, .23f, 0));
             RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, .23f, LAYER_MASK_ENVIRONMENT);
             if (hit.collider != null) {
-                return true;
+                ret++;
             }
         }
-        return false;
+        return ret;
     }
     TileType GroundType() {
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, .23f, LAYER_MASK_ENVIRONMENT);
@@ -172,6 +194,12 @@ public class PlayerScript : MonoBehaviour
         int airControls = NumGene(GeneID.AirControl);
         airControls = Mathf.Min(airControls, AIR_CONTROL.Length - 1);
         return AIR_CONTROL[airControls];
+    }
+    bool GetSpecialButton(GeneID id) {
+        return HasGene(id) && Input.GetButton("Special");
+    }
+    bool GetSpecialButtonDown(GeneID id) {
+        return HasGene(id) && Input.GetButtonDown("Special");
     }
 
     private void OnTriggerEnter2D(Collider2D collision) {
@@ -195,7 +223,7 @@ public class PlayerScript : MonoBehaviour
             inPuffs--;
         }
         if (collision.gameObject.layer == LAYER_CHECKPOINT) {
-            collision.gameObject.GetComponent<ShopSpawnerScript>().Leave();
+            collision.gameObject.GetComponent<ShopSpawnerScript>().Leave(this);
             inCheckpoint = false;
         }
     }

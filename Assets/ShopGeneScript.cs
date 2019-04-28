@@ -29,7 +29,7 @@ public class ShopGeneScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float y = Mathf.Sin(Time.frameCount * .033f) * .015f;
+        float y = Mathf.Sin(Time.frameCount * .033f) * .0125f;
         spriteObject.transform.localPosition = new Vector3(0, y, 0);
     }
 

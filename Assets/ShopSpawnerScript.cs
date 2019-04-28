@@ -31,12 +31,13 @@ public class ShopSpawnerScript : MonoBehaviour
             }
         }
         noLeaveTimer = 60;
-        playerScript.deathY = transform.localPosition.y + 2f;
+        playerScript.deathY = transform.parent.localPosition.y - 6f;
     }
-    public void Leave() {
+    public void Leave(PlayerScript playerScript) {
         if (noLeaveTimer > 0) {
             return;
         }
+        playerScript.lastSafePosition = transform.parent.localPosition;
         foreach (Transform child in transform.parent) {
             if (!child.gameObject.activeSelf) {
                 child.gameObject.SetActive(true);

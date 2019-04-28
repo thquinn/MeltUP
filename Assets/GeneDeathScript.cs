@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class GeneDeathScript : MonoBehaviour
@@ -13,6 +14,7 @@ public class GeneDeathScript : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         dx = Random.Range(-.033f, -.02f);
         dTheta = Random.Range(-5f, 5f);
+        
     }
 
     // Update is called once per frame
