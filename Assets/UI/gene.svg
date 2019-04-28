@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 17.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="960px" height="560px" viewBox="0 0 960 560" enable-background="new 0 0 960 560" xml:space="preserve">
+<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="-219.0081" y1="280.1965" x2="-205.6746" y2="280.1965" gradientTransform="matrix(-1 0 0 1 268.2339 0)">
+	<stop  offset="0" style="stop-color:#E6E6E6"/>
+	<stop  offset="0.0715" style="stop-color:#E0E0E0"/>
+	<stop  offset="0.3045" style="stop-color:#D1D1D1"/>
+	<stop  offset="0.5" style="stop-color:#CCCCCC"/>
+	<stop  offset="0.6966" style="stop-color:#D1D1D1"/>
+	<stop  offset="0.9419" style="stop-color:#E1E1E1"/>
+	<stop  offset="1" style="stop-color:#E6E6E6"/>
+</linearGradient>
+<path fill="url(#SVGID_1_)" d="M473.908,286.03h4c0-2.078,1.221-3.833,2.667-3.833c3.676,0,6.667-3.514,6.667-7.833h-4
+	c0,2.078-1.221,3.833-2.667,3.833C476.899,278.197,473.908,281.71,473.908,286.03z"/>
+<linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="473.9085" y1="280.1965" x2="487.242" y2="280.1965">
+	<stop  offset="0" style="stop-color:#CCCCCC"/>
+	<stop  offset="0.0987" style="stop-color:#E1E1E1"/>
+	<stop  offset="0.2146" style="stop-color:#F2F2F2"/>
+	<stop  offset="0.3417" style="stop-color:#FCFCFC"/>
+	<stop  offset="0.5" style="stop-color:#FFFFFF"/>
+	<stop  offset="0.6583" style="stop-color:#FCFCFC"/>
+	<stop  offset="0.7854" style="stop-color:#F2F2F2"/>
+	<stop  offset="0.9013" style="stop-color:#E1E1E1"/>
+	<stop  offset="1" style="stop-color:#CCCCCC"/>
+</linearGradient>
+<path fill="url(#SVGID_2_)" d="M487.242,286.03h-4c0-2.078-1.221-3.833-2.667-3.833c-3.676,0-6.667-3.514-6.667-7.833h4
+	c0,2.078,1.221,3.833,2.667,3.833C484.251,278.197,487.242,281.71,487.242,286.03z"/>
+</svg>
