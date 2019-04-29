@@ -10,9 +10,22 @@ public class AudioScript : MonoBehaviour
     public AudioSource[] uraniums;
     public AudioSource[] mutates;
 
+    public static AudioScript Instance = null;
+
     // Start is called before the first frame update
     void Start()
     {
+        // If there is not already an instance of SoundManager, set it to this.
+        if (Instance == null) {
+            Instance = this;
+        }
+        //If an instance already exists, destroy whatever this object is to enforce the singleton.
+        else if (Instance != this) {
+            Destroy(gameObject);
+        }
+
+        //Set SoundManager to DontDestroyOnLoad so that it won't be destroyed when reloading our scene.
+        DontDestroyOnLoad(gameObject);
         bgmVolume = bgm.volume;
         bgm.volume = 0;
     }

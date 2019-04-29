@@ -63,11 +63,11 @@ namespace Assets.Structs {
             { GeneID.Restoration, new int[]{ 8, 11 } },
         };
         public static Dictionary<GeneID, float> SHOP_WEIGHT_LOOKUP = new Dictionary<GeneID, float>() {
-            { GeneID.Speed, 1f },
+            { GeneID.Speed, 2f },
             { GeneID.DoubleJump, .5f },
             { GeneID.LeapOfFaith, .33f },
             { GeneID.JumpControl, 1f },
-            { GeneID.AirControl, 1f },
+            { GeneID.AirControl, 2f },
             { GeneID.Junk, .66f },
             { GeneID.Armor, 1f },
             { GeneID.UraniumBlock, .25f },

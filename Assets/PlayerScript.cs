@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerScript : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class PlayerScript : MonoBehaviour
     static readonly float AIR_JUMP_POWER = 2.2f;
     static readonly float JUMP_GRAVITY = .33f;
     static readonly float SPRING_POWER = 7.5f;
-    static float[] AIR_CONTROL = new float[] { .025f, .15f, .4f, .55f, .75f, 1};
+    static float[] AIR_CONTROL = new float[] { .075f, .15f, .4f, .55f, .75f, 1};
     static int JUMP_REFRESH_FRAMES = 3, GROUND_LINGER_FRAMES = 6;
     static float GLIDE_SPEED = -.025f, GLIDE_POWER = .75f;
     static float BLINK_DISTANCE = 1;
@@ -21,7 +22,6 @@ public class PlayerScript : MonoBehaviour
     int LAYER_URANIUM, LAYER_PUFF, LAYER_CHECKPOINT, LAYER_SHOP_GENE;
     int LAYER_MASK_ENVIRONMENT;
 
-    new public AudioScript audio;
     public GameObject spriteObject, airJumpPrefab;
     Rigidbody2D rb2d;
 
@@ -37,6 +37,7 @@ public class PlayerScript : MonoBehaviour
     bool rightLastInput = true;
     public Vector3 lastSafePosition;
     public float maxY;
+    public bool dead;
 
     // Start is called before the first frame update
     void Start()
@@ -57,21 +58,34 @@ public class PlayerScript : MonoBehaviour
 
         deathY = -5f;
         lastSafePosition = transform.localPosition;
-        uranium = 20;
+        uranium = 0;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKey(KeyCode.Escape)) {
+            Application.Quit();
+        }
         if (transform.localPosition.y > maxY) {
             maxY = transform.localPosition.y;
         }
         if (transform.localPosition.y < deathY) {
-            if (!HasGene(GeneID.Respawn)) {
-                Destroy(gameObject);
-                return;
+            if (HasGene(GeneID.Respawn)) {
+                transform.localPosition = lastSafePosition;
+            } else {
+                dead = true;
+            } 
+        }
+        if (genes.Count == 0) {
+            transform.Translate(0, -100, 0);
+        }
+        if (dead) {
+            if (Input.GetKeyDown(KeyCode.R)) {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             }
-            transform.localPosition = lastSafePosition;
+            rb2d.velocity = Vector2.zero;
+            return;
         }
 
         int groundedness = CheckGrounded();
@@ -121,7 +135,7 @@ public class PlayerScript : MonoBehaviour
             jumpRefreshFrames = JUMP_REFRESH_FRAMES;
             GameObject fx = Instantiate(airJumpPrefab, transform.parent);
             fx.transform.localPosition = transform.localPosition + new Vector3(0, grounded ? -.2f : -.1f, 0);
-            audio.Jump();
+            AudioScript.Instance.Jump();
         } else {
             jumpRefreshFrames--;
         }
@@ -143,10 +157,10 @@ public class PlayerScript : MonoBehaviour
 
         bool tutorial = transform.localPosition.y < 2 && !tutorialScript.Done();
         if (!tutorial && !inCheckpoint) {
-            mutationMeter += .00005f;
-            float uraniumMult = .000025f * Mathf.Pow(.5f, NumGene(GeneID.UraniumBlock));
+            mutationMeter += Mathf.Pow(maxY, 0.5f) * .00002f;
+            float uraniumMult = .000015f * Mathf.Pow(.5f, NumGene(GeneID.UraniumBlock));
             mutationMeter += uranium * uraniumMult;
-            mutationMeter += genes.Count * .00002f;
+            mutationMeter += Mathf.Max(0, genes.Count - 4) * .00001f;
             if (inPuffs > 0) {
                 mutationMeter += .005f;
             }
@@ -222,7 +236,7 @@ public class PlayerScript : MonoBehaviour
         if (collision.gameObject.layer == LAYER_URANIUM) {
             Destroy(collision.gameObject);
             uranium++;
-            audio.Uranium();
+            AudioScript.Instance.Uranium();
         }
         if (collision.gameObject.layer == LAYER_PUFF) {
             inPuffs++;

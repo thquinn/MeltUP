@@ -9,9 +9,8 @@ public class FloatingPanelScript : MonoBehaviour
     public static readonly float GENE_SPACING = .33f;
 
     public PlayerScript playerScript;
-    new public AudioScript audio;
     public PopupTextScript popupTextScript;
-    public TextMeshPro uraniumText, currentHeightText, maxHeightText;
+    public TextMeshPro uraniumText, currentHeightText, maxHeightText, gameOverText;
     public GameObject genePrefab, mutationProjectilePrefab;
     public GameObject mutationBar;
     List<GameObject> geneObjects;
@@ -46,12 +45,19 @@ public class FloatingPanelScript : MonoBehaviour
         }
 
         // Update height texts.
-        currentHeightText.text = YToMeters(playerScript.gameObject.transform.localPosition.y) + "m";
-        maxHeightText.text = YToMeters(playerScript.maxY) + "m";
+        string currentHeightString = YToMeters(playerScript.gameObject.transform.localPosition.y) + "m";
+        string maxHeightString = YToMeters(playerScript.maxY) + "m";
+        currentHeightText.text = playerScript.dead ? maxHeightString : currentHeightString;
+        maxHeightText.text = maxHeightString;
 
-        if (Input.GetKeyDown(KeyCode.Space) || playerScript.mutationMeter >= 1) {
+        if (playerScript.mutationMeter >= 1) {
             SpawnMutationProjectile();
             playerScript.mutationMeter = 0;
+        }
+        if (playerScript.dead && gameOverText.color.a < 1) {
+            Color color = gameOverText.color;
+            color.a = Mathf.Min(1, color.a + .05f);
+            gameOverText.color = color;
         }
     }
     void AddGene(int i) {
@@ -92,7 +98,7 @@ public class FloatingPanelScript : MonoBehaviour
 
         GameObject projectile = Instantiate(mutationProjectilePrefab, transform);
         projectile.GetComponent<MutationLineScript>().SetTarget(targetIndex);
-        audio.Mutate();
+        AudioScript.Instance.Mutate();
     }
     public void DestroyGene(int i) {
         GeneID id = playerScript.genes[i].id;

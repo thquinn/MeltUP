@@ -67,6 +67,7 @@
     <Compile Include="Assets\BackplateScript.cs" />
     <Compile Include="Assets\CameraScript.cs" />
     <Compile Include="Assets\ConveyorScript.cs" />
+    <Compile Include="Assets\DirtScript.cs" />
     <Compile Include="Assets\FloatingPanelScript.cs" />
     <Compile Include="Assets\GeneDeathScript.cs" />
     <Compile Include="Assets\GrateScript.cs" />
