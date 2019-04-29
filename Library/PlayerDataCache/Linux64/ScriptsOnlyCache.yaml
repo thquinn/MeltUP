@@ -909,4 +909,4 @@ ScriptsOnlyBuild:
   platform: 24
   scenePathNames:
   - Assets/Scenes/SampleScene.unity
-  playerPath: C:/Users/Cae/Desktop/MeltUP 0.2.x86_64
+  playerPath: C:/Users/Cae/Desktop/MeltUP/MeltUP0.2.x86_64

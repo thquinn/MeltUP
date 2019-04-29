@@ -25,12 +25,15 @@ Temp/
 Obj/
 UnityGenerated/
 Library/
+Logs/
 Assets/AssetStoreTools*
 
 # ===================================== #
 # Visual Studio / MonoDevelop generated #
 # ===================================== #
 ExportedObj/
+obj/
+.vs/
 *.svd
 *.userprefs
 *.csproj
