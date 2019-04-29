@@ -366,7 +366,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: ad46c4ec7a5f15a41b5a1aee2463b55a, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.5
+  m_Volume: 0.75
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -462,7 +462,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: bb271f5efa02e7744b70d1c93f2a2cdd, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.5
+  m_Volume: 0.75
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -558,7 +558,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: e1d00aaae0c701e47abf2f5accd5a4e4, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.5
+  m_Volume: 0.75
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -888,12 +888,13 @@ PolygonCollider2D:
     m_Paths:
     - - {x: 0.11820793, y: 0.10198784}
       - {x: 0.096064806, y: 0.18930197}
+      - {x: 0.0064971447, y: 0.20562315}
       - {x: -0.071560144, y: 0.18889964}
       - {x: -0.10414219, y: 0.10434979}
       - {x: -0.098623484, y: -0.13387284}
-      - {x: -0.06273143, y: -0.19465816}
+      - {x: -0.068048954, y: -0.19643065}
       - {x: 0.00060809776, y: -0.20108397}
-      - {x: 0.069041744, y: -0.1957742}
+      - {x: 0.07494998, y: -0.19695586}
       - {x: 0.108603954, y: -0.13372123}
 --- !u!114 &332687975
 MonoBehaviour:
@@ -907,7 +908,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cf18537c83f8f14ca81a274c79b2ac5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  audio: {fileID: 303428539}
   spriteObject: {fileID: 1884647155}
   airJumpPrefab: {fileID: 2377889374381109634, guid: c5babc8d40409da4a9616fa38061c983,
     type: 3}
@@ -2318,7 +2318,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerScript: {fileID: 332687975}
-  audio: {fileID: 303428539}
   popupTextScript: {fileID: 824386476}
   uraniumText: {fileID: 1100471033}
   currentHeightText: {fileID: 1848902989}

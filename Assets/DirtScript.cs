@@ -19,7 +19,7 @@ public class DirtScript : MonoBehaviour
     void Update()
     {
         Color color = spriteRenderer.color;
-        color.a = Mathf.Clamp01(color.a + (collider2D.enabled ? .1f : -.1f));
+        color.a = Mathf.Clamp01(color.a + (collider2D.enabled ? .166f : -.166f));
         spriteRenderer.color = color;
 
         if (timer > 0) {
@@ -35,7 +35,7 @@ public class DirtScript : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision) {
         if (timer == 0) {
-            timer = 40;
+            timer = 24;
         }
     }
 }

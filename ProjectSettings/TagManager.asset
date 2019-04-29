@@ -9,6 +9,7 @@ TagManager:
   - LevelGenerator
   - Spring
   - Audio
+  - ConveyorLeft
   layers:
   - Default
   - TransparentFX

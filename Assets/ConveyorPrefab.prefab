@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 5242966894300422715}
   - component: {fileID: 6347883937995352336}
   - component: {fileID: 6347883937995352339}
-  - component: {fileID: 6347883937995352338}
   - component: {fileID: 6347883937995352351}
   m_Layer: 8
   m_Name: ConveyorPrefab
@@ -132,24 +131,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.2000003, y: 0.2}
   m_EdgeRadius: 0
---- !u!252 &6347883937995352338
-SurfaceEffector2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5480456378846624547}
-  m_Enabled: 1
-  m_UseColliderMask: 1
-  m_ColliderMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_Speed: 18
-  m_SpeedVariation: 0
-  m_ForceScale: 0.125
-  m_UseContactForce: 0
-  m_UseFriction: 0
-  m_UseBounce: 0
 --- !u!114 &6347883937995352351
 MonoBehaviour:
   m_ObjectHideFlags: 0

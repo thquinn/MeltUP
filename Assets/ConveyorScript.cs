@@ -5,7 +5,7 @@ using UnityEngine;
 public class ConveyorScript : MonoBehaviour
 {
     GameObject gearbox;
-    float[] rotations = new float[] { -5, 4, -8 };
+    float[] rotations = new float[] { -10, 4, -8 };
 
     // Start is called before the first frame update
     void Start()
@@ -44,8 +44,7 @@ public class ConveyorScript : MonoBehaviour
     }
 
     public void Flip() {
-        SurfaceEffector2D effector = GetComponent<SurfaceEffector2D>();
-        effector.speed = -effector.speed;
+        tag = "ConveyorLeft";
         for (int i = 0; i < rotations.Length; i++) {
             rotations[i] = -rotations[i];
         }

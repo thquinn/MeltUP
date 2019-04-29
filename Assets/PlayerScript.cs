@@ -6,13 +6,15 @@ using UnityEngine.SceneManagement;
 
 public class PlayerScript : MonoBehaviour
 {
-    static float[] MAX_SPEED = new float[] { 2.125f, 3, 3.5f, 4, 4.33f, 4.66f, 5};
+    static float[] MAX_SPEED = new float[] { 3, 3.5f, 4, 4.33f, 4.66f, 5};
     static readonly float FRICTION = .5f;
     static readonly float TEFLON_FRICTION = .99f;
     static readonly float TEFLON_CONTROL = .5f;
     static readonly float JUMP_POWER = 2.75f;
     static readonly float AIR_JUMP_POWER = 2.2f;
+    static readonly float JUMP_POWER_BONUS = .275f;
     static readonly float JUMP_GRAVITY = .33f;
+    static readonly float CONVEYOR_POWER = .025f;
     static readonly float SPRING_POWER = 7.5f;
     static float[] AIR_CONTROL = new float[] { .075f, .15f, .4f, .55f, .75f, 1};
     static int JUMP_REFRESH_FRAMES = 3, GROUND_LINGER_FRAMES = 6;
@@ -38,6 +40,8 @@ public class PlayerScript : MonoBehaviour
     public Vector3 lastSafePosition;
     public float maxY;
     public bool dead;
+    float lastConveyorImpulse;
+    bool hitSpring;
 
     // Start is called before the first frame update
     void Start()
@@ -50,9 +54,7 @@ public class PlayerScript : MonoBehaviour
         rb2d = GetComponent<Rigidbody2D>();
 
         genes = new List<Gene>();
-        genes.Add(new Gene(GeneID.Speed));
         genes.Add(new Gene(GeneID.JumpControl));
-        genes.Add(new Gene(GeneID.AirControl));
         genes.Add(new Gene(GeneID.AirControl));
         genes.Add(new Gene(GeneID.Respawn));
 
@@ -77,8 +79,10 @@ public class PlayerScript : MonoBehaviour
                 dead = true;
             } 
         }
+        deathY = Mathf.Max(deathY, transform.localPosition.y - 10);
         if (genes.Count == 0) {
             transform.Translate(0, -100, 0);
+            dead = true;
         }
         if (dead) {
             if (Input.GetKeyDown(KeyCode.R)) {
@@ -88,10 +92,10 @@ public class PlayerScript : MonoBehaviour
             return;
         }
 
-        int groundedness = CheckGrounded();
-        bool grounded = groundedness > 0;
-        TileType groundType = GroundType();
-        if (groundedness == 7) {
+        GroundResult groundResult = CheckGrounded();
+        bool grounded = groundResult.num > 0;
+        TileType groundType = groundResult.groundType;
+        if (groundResult.num >= 7) {
             lastSafePosition = transform.localPosition;
         }
 
@@ -121,6 +125,7 @@ public class PlayerScript : MonoBehaviour
             jumps = MaxJumps();
             groundLingerFrames = GROUND_LINGER_FRAMES;
             blinks = 1;
+            hitSpring = false;
         } else if (!grounded) { 
             if (groundLingerFrames == 0) {
                 jumps = Mathf.Min(MaxPotentialJumps() - 1, jumps);
@@ -130,7 +135,9 @@ public class PlayerScript : MonoBehaviour
         }
 
         if (jumps > 0 && Input.GetButtonDown("Jump")) {
-            newY = Mathf.Max(newY, (grounded || groundLingerFrames > 0) ? JUMP_POWER : AIR_JUMP_POWER);
+            float jumpPower = JUMP_POWER + NumGene(GeneID.JumpPower) * JUMP_POWER_BONUS;
+            float airJumpPower = AIR_JUMP_POWER + NumGene(GeneID.JumpPower) * JUMP_POWER_BONUS;
+            newY = Mathf.Max(newY, (grounded || groundLingerFrames > 0) ? jumpPower : airJumpPower);
             jumps--;
             jumpRefreshFrames = JUMP_REFRESH_FRAMES;
             GameObject fx = Instantiate(airJumpPrefab, transform.parent);
@@ -139,8 +146,19 @@ public class PlayerScript : MonoBehaviour
         } else {
             jumpRefreshFrames--;
         }
-        if (groundType == TileType.Spring) {
+        if (groundType == TileType.Conveyor) {
+            transform.Translate(CONVEYOR_POWER, 0, 0);
+            lastConveyorImpulse = CONVEYOR_POWER;
+        } else if (groundType == TileType.ConveyorLeft) {
+            transform.Translate(-CONVEYOR_POWER, 0, 0);
+            lastConveyorImpulse = -CONVEYOR_POWER;
+        } else if (groundType == TileType.Spring) {
             newY = Mathf.Max(newY, SPRING_POWER);
+            hitSpring = true;
+            jumpRefreshFrames = JUMP_REFRESH_FRAMES;
+        } else if (lastConveyorImpulse != 0) {
+            newX += lastConveyorImpulse * 60;
+            lastConveyorImpulse = 0;
         }
 
         if (GetSpecialButton(GeneID.Glide) && newY < GLIDE_SPEED) {
@@ -151,14 +169,19 @@ public class PlayerScript : MonoBehaviour
             blinks--;
         }
 
+        // DEBUG STUFF
+        if (Input.GetKey(KeyCode.F1) && Application.isEditor) {
+            newY = 10;
+        }
+
         rb2d.velocity = new Vector2(newX, newY);
         spriteObject.transform.localRotation = Quaternion.Lerp(spriteObject.transform.localRotation, Quaternion.Euler(0, rightLastInput ? 0 : 180, 0), .33f);
-        rb2d.gravityScale = newY > 0 && (Input.GetButton("Jump") || !HasGene(GeneID.JumpControl)) ? JUMP_GRAVITY : 1;
+        rb2d.gravityScale = newY > 0 && (Input.GetButton("Jump") || !HasGene(GeneID.JumpControl)) && !hitSpring ? JUMP_GRAVITY : 1;
 
         bool tutorial = transform.localPosition.y < 2 && !tutorialScript.Done();
         if (!tutorial && !inCheckpoint) {
-            mutationMeter += Mathf.Pow(maxY, 0.5f) * .00002f;
-            float uraniumMult = .000015f * Mathf.Pow(.5f, NumGene(GeneID.UraniumBlock));
+            mutationMeter += Mathf.Pow(Mathf.Max(0, maxY), 0.75f) * .000015f;
+            float uraniumMult = .00002f * Mathf.Pow(.5f, NumGene(GeneID.UraniumBlock));
             mutationMeter += uranium * uraniumMult;
             mutationMeter += Mathf.Max(0, genes.Count - 4) * .00001f;
             if (inPuffs > 0) {
@@ -195,30 +218,30 @@ public class PlayerScript : MonoBehaviour
     int MaxPotentialJumps() {
         return 1 + NumGene(GeneID.DoubleJump) + NumGene(GeneID.LeapOfFaith);
     }
-    int CheckGrounded() {
+    static readonly Dictionary<string, TileType> specialGroundTags = new Dictionary<string, TileType>() {
+        { "Conveyor", TileType.Conveyor },
+        { "ConveyorLeft", TileType.ConveyorLeft },
+        { "Spring", TileType.Spring },
+        { "Teflon", TileType.Teflon },
+    };
+    GroundResult CheckGrounded() {
         int ret = 0;
-        for (float dx = -.075f; dx <= .075f; dx += .025f) {
+        TileType tileType = TileType.None;
+        for (float dx = -.1f; dx <= .1f; dx += .025f) {
             Vector2 rayStart = new Vector3(transform.position.x + dx, transform.position.y);
             Debug.DrawLine(transform.position + new Vector3(dx, 0, 0), transform.position - new Vector3(-dx, .23f, 0));
             RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, .23f, LAYER_MASK_ENVIRONMENT);
             if (hit.collider != null) {
                 ret++;
+                if (specialGroundTags.ContainsKey(hit.collider.gameObject.tag)) {
+                    tileType = specialGroundTags[hit.collider.gameObject.tag];
+                }
             }
         }
-        return ret;
-    }
-    TileType GroundType() {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, .23f, LAYER_MASK_ENVIRONMENT);
-        if (hit.collider == null) {
-            return TileType.None;
+        if (tileType == TileType.None) {
+            tileType = TileType.Ground;
         }
-        if (hit.collider.gameObject.tag == "Teflon") {
-            return TileType.Teflon;
-        }
-        if (hit.collider.gameObject.tag == "Spring") {
-            return TileType.Spring;
-        }
-        return TileType.Ground;
+        return new GroundResult(ret, tileType);
     }
     float AirControl() {
         int airControls = NumGene(GeneID.AirControl);
@@ -258,5 +281,15 @@ public class PlayerScript : MonoBehaviour
             collision.gameObject.GetComponent<ShopSpawnerScript>().Leave(this);
             inCheckpoint = false;
         }
+    }
+}
+
+struct GroundResult {
+    public int num;
+    public TileType groundType;
+
+    public GroundResult(int num, TileType groundType) {
+        this.num = num;
+        this.groundType = groundType;
     }
 }

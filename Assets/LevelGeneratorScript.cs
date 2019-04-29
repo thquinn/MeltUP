@@ -72,6 +72,8 @@ public class LevelGeneratorScript : MonoBehaviour
         }
         activeChunks = new List<GameObject>();
         SpawnNewChunk(0);
+        //SpawnNewChunk(22);
+        //SpawnNewChunk(1);
         chunkBag = new List<int>();
 
         backplateses = new List<GameObject>[2];
@@ -133,7 +135,7 @@ public class LevelGeneratorScript : MonoBehaviour
             List<GameObject> backplates = backplateses[i];
             if (backplates.Count > 0) {
                 Vector3 screenPos = backplates[0].transform.localPosition - Camera.main.transform.localPosition;
-                if (screenPos.y < -100) {
+                if (screenPos.y < -20) {
                     Destroy(backplates[0]);
                     backplates.RemoveAt(0);
                 }
