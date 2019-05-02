@@ -27,7 +27,7 @@ public class DirtScript : MonoBehaviour
             if (timer == 0) {
                 collider2D.enabled = !collider2D.enabled;
                 if (!collider2D.enabled) {
-                    timer = 300;
+                    timer = 240;
                 }
             }
         }

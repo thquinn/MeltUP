@@ -13,12 +13,14 @@ public class FloatingPanelScript : MonoBehaviour
     public TextMeshPro uraniumText, currentHeightText, maxHeightText, gameOverText;
     public GameObject genePrefab, mutationProjectilePrefab;
     public GameObject mutationBar;
+    Camera cam;
     List<GameObject> geneObjects;
 
     Vector2 offset;
     float barX;
 
     void Start() {
+        cam = Camera.main;
         geneObjects = new List<GameObject>();
         offset = transform.position;
         barX = mutationBar.transform.localPosition.x;
@@ -27,7 +29,7 @@ public class FloatingPanelScript : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        transform.position = new Vector3(Camera.main.transform.position.x + offset.x, Camera.main.transform.position.y + offset.y, transform.position.z);
+        transform.position = new Vector3(cam.transform.position.x + offset.x, cam.transform.position.y + offset.y, transform.position.z);
         uraniumText.text = playerScript.uranium.ToString();
         float width = playerScript.mutationMeter * 117;
         float x = barX + width / 200f;

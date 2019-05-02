@@ -21,7 +21,7 @@ public class CameraScript : MonoBehaviour
     {
         float x = transform.position.x * (1 - TRACKING) + player.transform.position.x * TRACKING;
         float y = transform.position.y * (1 - TRACKING) + player.transform.position.y * TRACKING;
-        y = Mathf.Max(y, playerScript.deathY + 3);
+        y = Mathf.Max(y, playerScript.deathY + 2.5f);
         transform.position = new Vector3(x, y, transform.position.z);
     }
 }

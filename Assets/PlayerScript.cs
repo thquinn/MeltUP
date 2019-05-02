@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class PlayerScript : MonoBehaviour
 {
-    static float[] MAX_SPEED = new float[] { 3, 3.5f, 4, 4.33f, 4.66f, 5};
+    static float[] MAX_SPEED = new float[] { 3.1f, 3.6f, 4, 4.33f, 4.66f, 5};
     static readonly float FRICTION = .5f;
     static readonly float TEFLON_FRICTION = .99f;
     static readonly float TEFLON_CONTROL = .5f;
@@ -16,7 +16,7 @@ public class PlayerScript : MonoBehaviour
     static readonly float JUMP_GRAVITY = .33f;
     static readonly float CONVEYOR_POWER = .025f;
     static readonly float SPRING_POWER = 7.5f;
-    static float[] AIR_CONTROL = new float[] { .075f, .15f, .4f, .55f, .75f, 1};
+    static float[] AIR_CONTROL = new float[] { .1f, .2f, .4f, .55f, .75f, 1};
     static int JUMP_REFRESH_FRAMES = 3, GROUND_LINGER_FRAMES = 6;
     static float GLIDE_SPEED = -.025f, GLIDE_POWER = .75f;
     static float BLINK_DISTANCE = 1;
@@ -79,7 +79,7 @@ public class PlayerScript : MonoBehaviour
                 dead = true;
             } 
         }
-        deathY = Mathf.Max(deathY, transform.localPosition.y - 10);
+        deathY = Mathf.Max(deathY, transform.localPosition.y - 8);
         if (genes.Count == 0) {
             transform.Translate(0, -100, 0);
             dead = true;
@@ -180,8 +180,8 @@ public class PlayerScript : MonoBehaviour
 
         bool tutorial = transform.localPosition.y < 2 && !tutorialScript.Done();
         if (!tutorial && !inCheckpoint) {
-            mutationMeter += Mathf.Pow(Mathf.Max(0, maxY), 0.75f) * .000015f;
-            float uraniumMult = .00002f * Mathf.Pow(.5f, NumGene(GeneID.UraniumBlock));
+            mutationMeter += Mathf.Pow(Mathf.Max(0, maxY), 0.75f) * .0000125f;
+            float uraniumMult = .00000175f * Mathf.Pow(.5f, NumGene(GeneID.UraniumBlock));
             mutationMeter += uranium * uraniumMult;
             mutationMeter += Mathf.Max(0, genes.Count - 4) * .00001f;
             if (inPuffs > 0) {

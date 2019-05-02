@@ -20,6 +20,7 @@ public class LevelGeneratorScript : MonoBehaviour
     public GameObject groundPrefab, teflonPrefab, dirtPrefab, conveyorPrefab, springPrefab, gratePrefab, uraniumPrefab, hiddenPrefab;
     public GameObject[] backplatePrefabs, backbackplatePrefabs;
     public Dictionary<TileType, GameObject> TILE_TO_PREFAB;
+    Camera cam;
 
     public Texture2D chunksTexture;
     List<TileType[,]> chunks;
@@ -33,6 +34,8 @@ public class LevelGeneratorScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        cam = Camera.main;
+
         // Load prefabs.
         TILE_TO_PREFAB = new Dictionary<TileType, GameObject>() {
             { TileType.Ground, groundPrefab },
@@ -72,7 +75,6 @@ public class LevelGeneratorScript : MonoBehaviour
         }
         activeChunks = new List<GameObject>();
         SpawnNewChunk(0);
-        //SpawnNewChunk(22);
         //SpawnNewChunk(1);
         chunkBag = new List<int>();
 
@@ -120,7 +122,7 @@ public class LevelGeneratorScript : MonoBehaviour
         }
         // Spawn new chunks if necessary.
         float topChunkY = activeChunks[activeChunks.Count - 1].transform.localPosition.y;
-        if (topChunkY - Camera.main.transform.localPosition.y < 4) {
+        if (topChunkY - cam.transform.localPosition.y < 4) {
             if (sinceLastCheckpoint == 4) {
                 SpawnNewChunk(1);
                 sinceLastCheckpoint = 0;
@@ -134,7 +136,7 @@ public class LevelGeneratorScript : MonoBehaviour
         for (int i = 0; i < backplateses.Length; i++) {
             List<GameObject> backplates = backplateses[i];
             if (backplates.Count > 0) {
-                Vector3 screenPos = backplates[0].transform.localPosition - Camera.main.transform.localPosition;
+                Vector3 screenPos = backplates[0].transform.localPosition - cam.transform.localPosition;
                 if (screenPos.y < -20) {
                     Destroy(backplates[0]);
                     backplates.RemoveAt(0);
@@ -143,7 +145,7 @@ public class LevelGeneratorScript : MonoBehaviour
             bool newBackplate = backplates.Count == 0;
             if (!newBackplate) {
 
-                Vector3 screenPos = backplates[backplates.Count - 1].transform.localPosition - Camera.main.transform.localPosition;
+                Vector3 screenPos = backplates[backplates.Count - 1].transform.localPosition - cam.transform.localPosition;
                 newBackplate = screenPos.y < -2;
             }
             if (newBackplate) {

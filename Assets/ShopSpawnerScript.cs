@@ -37,7 +37,7 @@ public class ShopSpawnerScript : MonoBehaviour
             totalWeight += f;
         }
         List<GeneID> chosen = new List<GeneID>();
-        while (chosen.Count < 3) {
+        while (chosen.Count < 4) {
             float selector = Random.value * totalWeight;
             int targetIndex = 0;
             for (; targetIndex < weights.Length; targetIndex++) {
@@ -53,7 +53,7 @@ public class ShopSpawnerScript : MonoBehaviour
             chosen.Add(id);
         }
 
-        float spacing = 2.25f / chosen.Count;
+        float spacing = 2.5f / chosen.Count;
         for (int i = 0; i < chosen.Count; i++) {
             float xMult = i - (chosen.Count - 1) / 2;
             GameObject shopGene = Instantiate(shopGenePrefab, transform.parent, false);

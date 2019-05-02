@@ -16,12 +16,14 @@ public class TutorialScript : MonoBehaviour {
         "Okay, time to get going. <color=#F00>Clock's ticking!</color>"
     };
 
+    Camera cam;
     TextMeshPro text;
     int i;
 
     // Start is called before the first frame update
     void Start()
     {
+        cam = Camera.main;
         text = GetComponent<TextMeshPro>();
         text.text = TUTORIAL_TEXT[0];
     }
@@ -29,13 +31,13 @@ public class TutorialScript : MonoBehaviour {
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (Camera.main.transform.localPosition.y > 1.5f) {
+        if (cam.transform.localPosition.y > 1.5f) {
             Destroy(gameObject);
             return;
         }
 
         Vector3 pos = transform.localPosition;
-        pos.x = Camera.main.transform.localPosition.x;
+        pos.x = cam.transform.localPosition.x;
         transform.localPosition = pos;
 
         if (Input.GetButtonDown("Special")) {
